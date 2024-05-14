@@ -6,7 +6,7 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 17:40:26 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/14 18:24:20 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/14 19:54:49 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,20 +70,24 @@ char	*ft_strjoin_buf(char const *stack, char buffer[BUFFER_SIZE], size_t i)
 	size_t		total_len;
 	static char	*temp_line;
 
+	result = NULL;
 	while ((buffer[i] != '\0' && buffer[i] != '\n') && i < BUFFER_SIZE)
 		i++;
 	if (i < BUFFER_SIZE && temp_line)
 	{
 		temp_line = (char *)malloc(sizeof(char) * (BUFFER_SIZE - i + 1));
 		if (!temp_line)
+		{
+			free(result);
 			return (NULL);
+		}
 		ft_strlcpy_buf(temp_line, buffer + i, (BUFFER_SIZE - i + 1));
 	}
 	total_len = ft_strlen(stack) + i + 1;
 	result = (char *)malloc(sizeof(char) * total_len);
 	if (!result)
 		return (NULL);
-	ft_strlcpy_buf(result, stack, total_len);
+	ft_strlcpy_buf(result, stack, ft_strlen(stack) + 1);
 	ft_strlcat_buf(result, buffer, total_len);
 	return (result);
 }

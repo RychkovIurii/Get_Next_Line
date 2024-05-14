@@ -6,7 +6,7 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 17:40:11 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/14 18:25:13 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/14 19:54:32 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,23 +21,23 @@ char	*get_next_line(int fd)
 	ssize_t	i;
 
 	i = 0;
-	check_read = read(fd, buffer, BUFFER_SIZE);
-	if (check_read <= 0 || buffer <= 0)
+	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
-	one_line = ft_strjoin_buf("", buffer, check_read);
+	check_read = read(fd, buffer, BUFFER_SIZE);
+	if (check_read <= 0)
+		return (NULL);
+	one_line = ft_strjoin_buf("", buffer, i);
 	while (check_read > 0)
 	{
-		while (i < check_read)
+		check_read = read(fd, buffer, BUFFER_SIZE);
+		if (check_read < 0)
 		{
-			if (buffer[i] == '\n')
-			{
-				one_line = ft_strjoin_buf(one_line, buffer, i);
-				return (one_line);
-			}
-			i++;
+			free(one_line);
+			return (NULL);
 		}
-		if (check_read > 0)
-			one_line = ft_strjoin_buf(one_line, buffer, check_read);
+		else if (check_read < 0)
+			return (one_line);
+		one_line = ft_strjoin_buf(one_line, buffer, i);
 	}
 	return (one_line);
 }
