@@ -6,14 +6,24 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 17:40:26 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/14 17:25:54 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/14 18:24:20 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <unistd.h>
 
-size_t	ft_strlcpy_buf(char *dst, const char *src, size_t dstsize)
+static size_t	ft_strlen(const char	*str)
+{
+	size_t	i;
+
+	i = 0;
+	while (str[i] != '\0')
+		i++;
+	return (i);
+}
+
+static size_t	ft_strlcpy_buf(char *dst, const char *src, size_t dstsize)
 {
 	size_t	i;
 	size_t	src_len;
@@ -31,7 +41,7 @@ size_t	ft_strlcpy_buf(char *dst, const char *src, size_t dstsize)
 	return (src_len);
 }
 
-size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
+static size_t	ft_strlcat_buf(char *dst, const char *src, size_t dstsize)
 {
 	size_t	i;
 	size_t	dst_len;
@@ -54,26 +64,15 @@ size_t	ft_strlcat(char *dst, const char *src, size_t dstsize)
 	return (size_total);
 }
 
-size_t	ft_strlen(const char	*str)
-{
-	size_t	i;
-
-	i = 0;
-	while (str[i] != '\0')
-		i++;
-	return (i);
-}
-
 char	*ft_strjoin_buf(char const *stack, char buffer[BUFFER_SIZE], size_t i)
 {
 	char		*result;
 	size_t		total_len;
 	static char	*temp_line;
 
-	while ((buffer[i] != '\0' || buffer[i] != '\n') && i < BUFFER_SIZE)
+	while ((buffer[i] != '\0' && buffer[i] != '\n') && i < BUFFER_SIZE)
 		i++;
-
-	if (i != BUFFER_SIZE && temp_line)
+	if (i < BUFFER_SIZE && temp_line)
 	{
 		temp_line = (char *)malloc(sizeof(char) * (BUFFER_SIZE - i + 1));
 		if (!temp_line)
