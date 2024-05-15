@@ -6,7 +6,7 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 17:40:11 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/14 19:54:32 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/15 19:49:49 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,21 +23,14 @@ char	*get_next_line(int fd)
 	i = 0;
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
-	check_read = read(fd, buffer, BUFFER_SIZE);
-	if (check_read <= 0)
-		return (NULL);
-	one_line = ft_strjoin_buf("", buffer, i);
+	check_read = 1;
+	one_line = NULL;
 	while (check_read > 0)
 	{
-		check_read = read(fd, buffer, BUFFER_SIZE);
-		if (check_read < 0)
-		{
-			free(one_line);
-			return (NULL);
-		}
-		else if (check_read < 0)
-			return (one_line);
 		one_line = ft_strjoin_buf(one_line, buffer, i);
+		if (one_line[ft_strlen(one_line) - 1] == '\n')
+			return (one_line);
+		check_read = read(fd, buffer, BUFFER_SIZE);
 	}
 	return (one_line);
 }
