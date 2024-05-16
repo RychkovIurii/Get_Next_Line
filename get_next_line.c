@@ -6,12 +6,28 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 17:40:11 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/15 19:49:49 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/16 12:34:46 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <unistd.h>
+
+char	*ft_strchr(const char *s, int c)
+{
+	char	*ptr_s;
+
+	ptr_s = (char *)s;
+	while (*ptr_s != (char)c)
+	{
+		if (*ptr_s == '\0')
+		{
+			return (NULL);
+		}
+		ptr_s++;
+	}
+	return (ptr_s);
+}
 
 char	*get_next_line(int fd)
 {
