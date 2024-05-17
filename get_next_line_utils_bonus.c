@@ -6,7 +6,7 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/17 16:25:04 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/17 16:32:02 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/17 17:11:46 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,4 +87,26 @@ char	*ft_strlcat_buf(char *stack, char *buffer, ssize_t bytes_read)
 		new_stack[i++] = buffer[j++];
 	new_stack[i] = 0;
 	return (new_stack);
+}
+
+char	*ft_strdup(const char *s1)
+{
+	size_t	i;
+	char	*dst;
+	size_t	src_len;
+
+	i = 0;
+	if (!s1)
+		return (NULL);
+	src_len = ft_strlen_buf(s1);
+	dst = (char *)malloc(sizeof(char) * (src_len + 1));
+	if (dst == NULL)
+		return (NULL);
+	while (s1[i])
+	{
+		dst[i] = s1[i];
+		i++;
+	}
+	dst[i] = '\0';
+	return (dst);
 }
