@@ -4,3 +4,13 @@ abcd
 qwer
 
 lkjh
+
+
+
+**stack
+
+int main
+	char *stack
+
+	stack
+	&stack 

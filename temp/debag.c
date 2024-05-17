@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-ssize_t	ft_strlen(const char	*str)
+ssize_t	ft_strlen_buf(const char	*str)
 {
 	ssize_t	i;
 
@@ -13,6 +13,16 @@ ssize_t	ft_strlen(const char	*str)
 	return (i);
 }
 
+char	*free_stuff(char **ptr)
+{
+	if (ptr && *ptr)
+	{
+		free(*ptr);
+		*ptr = NULL;
+	}
+	return (NULL);
+}
+
 char	*ft_strdup(const char *s1)
 {
 	size_t	i;
@@ -20,7 +30,9 @@ char	*ft_strdup(const char *s1)
 	size_t	src_len;
 
 	i = 0;
-	src_len = ft_strlen(s1);
+	if (!s1)
+		return (NULL);
+	src_len = ft_strlen_buf(s1);
 	dst = (char *)malloc(sizeof(char) * (src_len + 1));
 	if (dst == NULL)
 		return (NULL);
@@ -49,58 +61,75 @@ size_t	ft_newline_counter(char *stack)
 	return (counter);
 }
 
-size_t	ft_strlcat_buf(char *d, char *s, size_t size, size_t bytes_read)
+char	*ft_strlcat_buf(char *stack, char *buffer, size_t bytes_read)
 {
-	size_t	i;
-	size_t	dst_len;
-	size_t	size_remain;
-	size_t	size_total;
+	ssize_t		i;
+	ssize_t		j;
+	char		*new_stack;
 
 	i = 0;
-	dst_len = ft_strlen(d);
-	size_total = dst_len + bytes_read;
-	if (size == 0 || size <= dst_len)
-		return (bytes_read + size);
-	else
-		size_remain = size - dst_len - 1;
-	while (i < bytes_read && size_remain > i)
+	j = 0;
+	new_stack = NULL;
+	if (bytes_read <= 0)
+		return (stack);
+	i = ft_strlen_buf(stack);
+	new_stack = (char *)malloc((i + bytes_read + 1) * sizeof(char));
+	if (!new_stack)
+		return (free_stuff(&stack));
+	while (stack != NULL && stack[j])
 	{
-		d[dst_len + i] = s[i];
-		i++;
+		new_stack[j] = stack[j];
+		j++;
 	}
-	d[dst_len + i] = s[i];
-	d[dst_len + i + 1] = '\0';
-	return (size_total);
+	j = 0;
+	stack = free_stuff(&stack);
+	while (j < bytes_read)
+		new_stack[i++] = buffer[j++];
+	new_stack[i] = 0;
+	return (new_stack);
 }
+
 char	*ft_remove_line(char *stack, char *line)
 {
-	char	*temp;
+	char	*new_stack;
+	size_t	line_len;
+	size_t	stack_len;
 
-	temp = stack;
-	stack = ft_strdup(stack + ft_strlen(line));
-	free(temp);
-	return (stack);
+	line_len = ft_strlen_buf(line);
+	stack_len = ft_strlen_buf(stack);
+	if (line_len >= stack_len)
+		return (free_stuff(&stack));
+	new_stack = ft_strdup(stack + line_len);
+	free_stuff(&stack);
+	return (new_stack);
 }
 
 char	*ft_extract_line(char *stack)
 {
 	size_t	i;
+	size_t	j;
 	char	*line;
 
 	i = 0;
+	if (!(stack))
+		return (NULL);
 	while (stack[i] != '\n' && stack[i] != '\0')
 		i++;
-	line = (char *)malloc(sizeof(char) * (i + 2));
+	if (stack[i] == '\n')
+		line = (char *)malloc(sizeof(char) * (i + 2));
+	else
+		line = (char *)malloc(sizeof(char) * (i + 1));
 	if (!line)
 		return (NULL);
-	i = 0;
-	while (stack[i] != '\n' && stack[i] != '\0')
+	j = 0;
+	while (j < i)
 	{
-		line[i] = stack[i];
-		i++;
+		line[j] = stack[j];
+		j++;
 	}
-	line[i] = stack[i];
-	line[i + 1] = '\0';
+	if (stack[i] == '\n')
+		line[j++] = '\n';
+	line[j] = '\0';
 	return (line);
 }
 
@@ -108,16 +137,14 @@ char	*ft_update_stack(char	**stack)
 {
 	char	*line;
 
+	if (!stack || !(*stack))
+		return (NULL);
 	line = ft_extract_line(*stack);
-	*stack = ft_remove_line(*stack, line);
+	if (line)
+	{
+		*stack = ft_remove_line(*stack, line);
+	}
 	return (line);
-}
-
-char	*free_stuff(char **ptr)
-{
-	free(*ptr);
-	*ptr = NULL;
-	return (*ptr);
 }
 
 char	*get_next_line(int fd)
@@ -131,23 +158,23 @@ char	*get_next_line(int fd)
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
 	bytes_read = 1;
-	while (bytes_read > 0)
+	while (bytes_read)
 	{
-		if (stack && *stack)
-			return (ft_update_stack(&stack));
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read <= 0)
-			return (free_stuff(&stack));
-		len_stack = ft_strlen(stack);
-		stack = (char *)malloc(sizeof(char) * (len_stack + bytes_read + 1));
-		if (!stack)
+		{
+			if (bytes_read == -1)
+				stack = free_stuff(&stack);
+			if (stack && *stack)
+				return (ft_update_stack(&stack));
+			stack = free_stuff(&stack);
 			return (NULL);
-		ft_strlcat_buf(stack, buffer, len_stack + bytes_read, bytes_read);
-		steps = ft_newline_counter(stack);
-		if (steps)
+		}
+		stack = ft_strlcat_buf(stack, buffer, bytes_read);
+		if (ft_newline_counter(stack))
 			return (ft_update_stack(&stack));
 	}
-	return (stack);
+	return (NULL);
 }
 
 int	main()
@@ -164,8 +191,8 @@ int	main()
 	// Read lines from the file until end of file
 	while ((line = get_next_line(fd)) != NULL)
 	{
-		printf("tulostaa rivin\n");
-		printf("%s\n", line);
+		printf("result:\n");
+		printf("%s", line);
 		free(line);
 	}
 	// Close the file
