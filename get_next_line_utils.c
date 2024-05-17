@@ -6,16 +6,15 @@
 /*   By: irychkov <irychkov@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/08 17:40:26 by irychkov          #+#    #+#             */
-/*   Updated: 2024/05/16 15:14:34 by irychkov         ###   ########.fr       */
+/*   Updated: 2024/05/17 15:42:16 by irychkov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <unistd.h>
 
-static size_t	ft_strlen(const char	*str)
+ssize_t	ft_strlen_buf(const char	*str)
 {
-	size_t	i;
+	ssize_t	i;
 
 	i = 0;
 	while (str && str[i])
@@ -23,73 +22,69 @@ static size_t	ft_strlen(const char	*str)
 	return (i);
 }
 
-static void	ft_strlcpy_buf(char *dst, const char *src, size_t dstsize)
+char	*free_stuff(char **ptr)
 {
-	size_t	i;
-
-	i = 0;
-	if (dstsize == 0)
-		return ;
-	while (i + 1 < dstsize && src[i] != '\0')
+	if (ptr && *ptr)
 	{
-		dst[i] = src[i];
-		i++;
+		free(*ptr);
+		*ptr = NULL;
 	}
-	dst[i] = '\0';
-	return ;
+	return (NULL);
 }
 
-static void	ft_strlcat_buf(char *dst, const char *src, size_t dstsize)
+char	*ft_extract_line(char *stack)
 {
 	size_t	i;
-	size_t	dst_len;
-	size_t	size_remain;
-	size_t	size_total;
+	size_t	j;
+	char	*line;
 
 	i = 0;
-	dst_len = ft_strlen(dst);
-	if (dstsize == 0 || dstsize <= dst_len)
-		return ;
-	else
-		size_remain = dstsize - dst_len - 1;
-	while (src[i] && size_remain > i)
-	{
-		dst[dst_len + i] = src[i];
-		i++;
-	}
-	dst[dst_len + i] = '\0';
-	return ;
-}
-
-char	*ft_strjoin_buf(char const *stack, char *buffer, size_t i)
-{
-	char		*result;
-	size_t		total_len;
-	static char	*temp_line;
-
-	while ((buffer[i] != '\0' && buffer[i] != '\n') && i < BUFFER_SIZE)
-		i++;
-	total_len = ft_strlen(stack) + i + 2 + ft_strlen(temp_line);
-	result = (char *)malloc(sizeof(char) * total_len);
-	if (!result)
+	if (!(stack))
 		return (NULL);
-	result[0] = '\0';
-	if (temp_line)
+	while (stack[i] != '\n' && stack[i] != '\0')
+		i++;
+	if (stack[i] == '\n')
+		line = (char *)malloc(sizeof(char) * (i + 2));
+	else
+		line = (char *)malloc(sizeof(char) * (i + 1));
+	if (!line)
+		return (NULL);
+	j = 0;
+	while (j < i)
 	{
-		ft_strlcpy_buf(result, temp_line, ft_strlen(temp_line) + 1);
-		free(temp_line);
+		line[j] = stack[j];
+		j++;
 	}
-	ft_strlcpy_buf(result, stack, ft_strlen(stack) + 1);
-	ft_strlcat_buf(result, buffer, total_len);
-	if (i < BUFFER_SIZE && buffer[i] == '\n')
+	if (stack[i] == '\n')
+		line[j++] = '\n';
+	line[j] = '\0';
+	return (line);
+}
+
+char	*ft_strlcat_buf(char *stack, char *buffer, ssize_t bytes_read)
+{
+	ssize_t		i;
+	ssize_t		j;
+	char		*new_stack;
+
+	i = 0;
+	j = 0;
+	new_stack = NULL;
+	if (bytes_read <= 0)
+		return (stack);
+	i = ft_strlen_buf(stack);
+	new_stack = (char *)malloc((i + bytes_read + 1) * sizeof(char));
+	if (!new_stack)
+		return (free_stuff(&stack));
+	while (stack != NULL && stack[j])
 	{
-		temp_line = (char *)malloc(sizeof(char) * (BUFFER_SIZE - i));
-		if (!temp_line)
-		{
-			free(result);
-			return (NULL);
-		}
-		ft_strlcpy_buf(temp_line, buffer + i + 1, (BUFFER_SIZE - i));
+		new_stack[j] = stack[j];
+		j++;
 	}
-	return (result);
+	j = 0;
+	stack = free_stuff(&stack);
+	while (j < bytes_read)
+		new_stack[i++] = buffer[j++];
+	new_stack[i] = 0;
+	return (new_stack);
 }
